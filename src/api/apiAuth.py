@@ -1,8 +1,19 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
+
+from src.config import SdkAws
+from src.controller import AuthController
+from src.service import AuthService, AuthServiceProvider
 
 api_auth = Blueprint('api_auth', __name__)
 
-@api_auth.route('/prueba', methods=['Post'])
-def prueba():
+# ID
+sdk = SdkAws.getInstance()
+authServiceProvider = AuthServiceProvider( sdk )
+service = AuthService( authServiceProvider )
+controller = AuthController( service )
 
-    return "1234"
+
+@api_auth.route('/userRegister', methods=['Post'])
+def userRegister():
+    data = request.get_json()
+    return controller.userRegister( data )
