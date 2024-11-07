@@ -19,12 +19,8 @@ class EnvsAwsSm:
         secret_name = os.environ[ 'EnvsCognito' ]
         region_name = "us-east-1"
 
-        print("HOLAAA")
-        print(secret_name)
-        print(self._sdk)
-
         # Create a Secrets Manager client
-        session = self._sdk.session.Session()
+        session = self._sdk.session
         client = session.client(
             service_name='secretsmanager',
             region_name=region_name
