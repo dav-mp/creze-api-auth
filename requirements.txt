@@ -1,3 +1,4 @@
 awscli
 Flask
 boto3
+marshmallow
