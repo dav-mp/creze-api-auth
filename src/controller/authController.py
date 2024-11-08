@@ -11,6 +11,8 @@ class AuthController:
 
         [ error, dataDto ] = UserRegisterDTO.createDTO( data )
         
+        print('ErrorDto', error)
+
         if( error ):
             return {
                 "fieldsError": dataDto,
@@ -20,13 +22,6 @@ class AuthController:
                 }
             }, 400
         
-        self.service.userRegister( dataDto )
+        return self.service.userRegister( dataDto )
 
 
-        print(error)
-        print(dataDto)
-
-
-        print("Andrey puto")
-
-        return "Andrey Puto"
