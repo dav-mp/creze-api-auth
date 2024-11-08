@@ -10,6 +10,7 @@ class AuthService:
 
     def userRegister( self, user: UserRegisterDTO ):
 
-        self.authServiceProvider.getEnvsBySdk()
-        pass
+        newUser = self.authServiceProvider.userRegister( user )
+
+        return newUser
 
