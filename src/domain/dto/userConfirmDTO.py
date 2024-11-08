@@ -1,9 +1,12 @@
 from marshmallow import Schema, fields, validate, ValidationError
 
 
-class UserConfirmDTO:
+class UserConfirmDTO(Schema):
     email = fields.String(required=True, validate=validate.Email())
-    confirmationCode = fields.Number(required=True, validate=validate.Length(equal=6))
+    confirmationCode = fields.String(
+        required=True, 
+        validate=[validate.Length(equal=6), validate.Regexp(r'^\d{6}$')]  # Asegura que tenga 6 dígitos numéricos
+    )
 
 
     @staticmethod
