@@ -1,4 +1,4 @@
-from src.domain.dto import UserRegisterDTO
+from src.domain.dto import UserRegisterDTO, userConfirmDTO
 from src.service.authServiceProvider import AuthServiceProvider
 
 class AuthService: 
@@ -13,4 +13,12 @@ class AuthService:
         newUser = self.authServiceProvider.userRegister( user )
 
         return newUser
+    
+    def userConfirm( self, data: userConfirmDTO ):
+
+        confirmation = self.authServiceProvider.userConfirm( data )
+
+        return confirmation
+
+
 
