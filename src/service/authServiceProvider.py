@@ -1,6 +1,6 @@
 # Importa SdkAws y EnvsAwsSm
 from src.config import SdkAws, EnvsAwsSm
-from src.domain.dto import UserRegisterDTO
+from src.domain.dto import UserRegisterDTO, UserConfirmDTO
 import json
 
 class AuthServiceProvider:
@@ -33,5 +33,22 @@ class AuthServiceProvider:
             return response
         except cognitoClient.exceptions.UsernameExistsException:
             return {"error": "Email already exists"}, 400
+        except Exception as e:
+            return {"error": str(e)}, 500
+        
+    def userConfirm( self, user: UserConfirmDTO ):
+
+        envs = json.loads(self.envsCognito)
+        session = self.sdk.get_session()
+        cognitoClient = session.client('cognito-idp', region_name='us-east-1')
+
+        try:
+            response = cognitoClient.confirm_sign_up(
+                ClientId=envs["CLIENT_ID"],
+                Username=user["email"],
+                ConfirmationCode=user["confirmationCode"]
+            )
+            print(response)
+            return {"message": "User confirmed successfully"}, 200
         except Exception as e:
             return {"error": str(e)}, 500
