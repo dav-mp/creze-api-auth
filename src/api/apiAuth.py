@@ -15,5 +15,24 @@ controller = AuthController( service )
 
 @api_auth.route('/userRegister', methods=['Post'])
 def userRegister():
-    data = request.get_json()
-    return controller.userRegister( data )
+    try:
+        data = request.get_json()
+        return controller.userRegister( data )
+    except Exception as e:
+        print('no tiene json')
+        return {
+            "error":"there is no data"
+        }, 400
+
+@api_auth.route('/userConfirm', methods=["Post"])
+def userConfirm():
+    try:
+        data = request.get_json()
+    except Exception as e:
+        print('no tiene json')
+        return {
+            "error":"there is no data"
+        }, 400
+    return controller.userConfirm( data )
+    
+        
