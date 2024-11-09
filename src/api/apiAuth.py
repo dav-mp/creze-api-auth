@@ -45,7 +45,17 @@ def userLogin():
             "error":"there is no data"
         }, 400
     return controller.userLogin( data )
-    
+
+@api_auth.route('/confirmMFA', methods=["Post"])
+def confirmMFA():
+    try:
+        data = request.get_json()
+    except Exception as e:
+        print('no tiene json')
+        return {
+            "error":"there is no data"
+        }, 400
+    return controller.confirmMFA( data )   
 
     
         
