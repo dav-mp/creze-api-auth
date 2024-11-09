@@ -1,6 +1,6 @@
 # Importa SdkAws y EnvsAwsSm
 from src.config import SdkAws, EnvsAwsSm
-from src.domain.dto import UserRegisterDTO, UserConfirmDTO, UserLoginDTO
+from src.domain.dto import UserRegisterDTO, UserConfirmDTO, UserLoginDTO, ConfirmMFADTO
 import json
 
 class AuthServiceProvider:
@@ -82,7 +82,6 @@ class AuthServiceProvider:
                 return {
                     **self.setupMFA( response["Session"] ),
                     "message": response['ChallengeName'],
-                    "session": response["Session"]
                 }, 200
             # Usuario autenticado
             return response['AuthenticationResult'], 200
@@ -99,7 +98,26 @@ class AuthServiceProvider:
         # Inicia el proceso de configuración de MFA y obtiene el secreto TOTP
             response = cognitoClient.associate_software_token(Session=session)
             secretode = response['SecretCode']  # Este es el código secreto para configurar TOTP - QR
-            return {"secretode": secretode}
+            return {"secretode": secretode, "session": response["Session"]}
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+    def confirmMFA( self, data: ConfirmMFADTO ):
+
+        cognitoClient = self._getCognitoClient()
+
+        try:
+            # Confirma el código TOTP ingresado por el usuario
+            response = cognitoClient.verify_software_token(
+                Session=data["session"],
+                UserCode=data["userCode"]
+            )
+            if response['Status'] == 'SUCCESS':
+                return {"message": "MFA setup complete", "response": response}, 200
+            else:
+                return {"error": "MFA setup failed"}, 400
+        except cognitoClient.exceptions.CodeMismatchException:
+            return {"error": "Invalid TOTP code"}, 403
         except Exception as e:
             return {"error": str(e)}, 500
 
