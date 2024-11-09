@@ -1,5 +1,5 @@
 from src.service import AuthService
-from src.domain.dto import UserRegisterDTO, UserConfirmDTO
+from src.domain.dto import UserRegisterDTO, UserConfirmDTO, UserLoginDTO
 
 
 class AuthController:
@@ -39,5 +39,21 @@ class AuthController:
             }, 400
         
         return self.service.userConfirm( dataDto )
+    
+    def userLogin( self, data ):
+
+        [ error, dataDto ] = UserLoginDTO.createDTO( data )
+
+        if( error ):
+            return {
+                "fieldsError": dataDto,
+                "status": {
+                    "code": 400,
+                    "message": "Bad request."
+                }
+            }, 400
+        
+        return self.service.userLogin( dataDto )
+
 
 
