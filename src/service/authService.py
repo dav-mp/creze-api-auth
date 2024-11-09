@@ -1,4 +1,4 @@
-from src.domain.dto import UserRegisterDTO, userConfirmDTO, UserLoginDTO
+from src.domain.dto import UserRegisterDTO, userConfirmDTO, UserLoginDTO, ConfirmMFADTO
 from src.service.authServiceProvider import AuthServiceProvider
 
 class AuthService: 
@@ -26,3 +26,8 @@ class AuthService:
 
         return login
 
+    def confirmMFA( self, data: ConfirmMFADTO):
+        
+        confirmMfa = self.authServiceProvider.confirmMFA( data )
+
+        return confirmMfa
