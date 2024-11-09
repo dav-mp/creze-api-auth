@@ -34,5 +34,18 @@ def userConfirm():
             "error":"there is no data"
         }, 400
     return controller.userConfirm( data )
+
+@api_auth.route('/userLogin', methods=["Post"])
+def userLogin():
+    try:
+        data = request.get_json()
+    except Exception as e:
+        print('no tiene json')
+        return {
+            "error":"there is no data"
+        }, 400
+    return controller.userLogin( data )
+    
+
     
         
