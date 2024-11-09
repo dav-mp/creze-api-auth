@@ -73,17 +73,33 @@ class AuthServiceProvider:
                 ClientId=envs["CLIENT_ID"],
                 AuthFlow='USER_PASSWORD_AUTH',
                 AuthParameters={
-                    'USERNAME': user["email"],  # Usa email como identificador en lugar de username
+                    'USERNAME': user["email"],  
                     'PASSWORD': user["password"]
                 }
             )
             print(response)
             if 'ChallengeName' in response and response['ChallengeName'] == 'MFA_SETUP':
-                # El usuario necesita MFA, envía un mensaje para que introduzca el código TOTP
-                return {"message": "MFA_REQUIRED", "session": response["Session"]}, 200
+                return {
+                    **self.setupMFA( response["Session"] ),
+                    "message": response['ChallengeName'],
+                    "session": response["Session"]
+                }, 200
             # Usuario autenticado
             return response['AuthenticationResult'], 200
         except cognitoClient.exceptions.NotAuthorizedException:
             return {"error": "Invalid credentials"}, 403
         except Exception as e:
             return {"error": str(e)}, 500
+        
+    def setupMFA( self, session: str ):
+
+        cognitoClient = self._getCognitoClient()
+
+        try:
+        # Inicia el proceso de configuración de MFA y obtiene el secreto TOTP
+            response = cognitoClient.associate_software_token(Session=session)
+            secretode = response['SecretCode']  # Este es el código secreto para configurar TOTP - QR
+            return {"secretode": secretode}
+        except Exception as e:
+            return {"error": str(e)}, 500
+
