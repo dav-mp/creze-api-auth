@@ -1,6 +1,6 @@
 # Importa SdkAws y EnvsAwsSm
 from src.config import SdkAws, EnvsAwsSm
-from src.domain.dto import UserRegisterDTO, UserConfirmDTO
+from src.domain.dto import UserRegisterDTO, UserConfirmDTO, UserLoginDTO
 import json
 
 class AuthServiceProvider:
@@ -11,6 +11,16 @@ class AuthServiceProvider:
         self.sdk = sdkProvider
         envs_aws_sm = EnvsAwsSm()  
         self.envsCognito = envs_aws_sm.getEnvs() 
+
+    def _getEnvsCognito( self ):
+        envs = json.loads(self.envsCognito)
+        return envs
+
+    def _getCognitoClient( self ):
+        session = self.sdk.get_session()
+        cognitoClient = session.client('cognito-idp', region_name='us-east-1')
+
+        return cognitoClient
     
     def userRegister(self, user: UserRegisterDTO):
 
@@ -50,5 +60,30 @@ class AuthServiceProvider:
             )
             print(response)
             return {"message": "User confirmed successfully"}, 200
+        except Exception as e:
+            return {"error": str(e)}, 500
+        
+    def userLogin( self, user: UserLoginDTO ):
+
+        envs = self._getEnvsCognito()
+        cognitoClient = self._getCognitoClient()
+
+        try:
+            response = cognitoClient.initiate_auth(
+                ClientId=envs["CLIENT_ID"],
+                AuthFlow='USER_PASSWORD_AUTH',
+                AuthParameters={
+                    'USERNAME': user["email"],  # Usa email como identificador en lugar de username
+                    'PASSWORD': user["password"]
+                }
+            )
+            print(response)
+            if 'ChallengeName' in response and response['ChallengeName'] == 'MFA_SETUP':
+                # El usuario necesita MFA, envía un mensaje para que introduzca el código TOTP
+                return {"message": "MFA_REQUIRED", "session": response["Session"]}, 200
+            # Usuario autenticado
+            return response['AuthenticationResult'], 200
+        except cognitoClient.exceptions.NotAuthorizedException:
+            return {"error": "Invalid credentials"}, 403
         except Exception as e:
             return {"error": str(e)}, 500
