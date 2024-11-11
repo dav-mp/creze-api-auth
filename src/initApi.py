@@ -22,6 +22,10 @@ class InitApi:
 
         app.register_blueprint(api_auth, url_prefix='/auth/user')
 
+        @app.route('/', methods=['GET'])
+        def home():
+            return "API is running", 200
+
         return app
 
         

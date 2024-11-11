@@ -1,13 +1,14 @@
-from flask import jsonify
+from src.initApi import InitApi
 import sys
 
-from src.initApi import InitApi
+# Crear la instancia de la aplicación Flask
+app = InitApi.createInstanceApi()
 
 if __name__ == "__main__":
-
     try:
-        app = InitApi.createInstanceApi()
+        # Ejecutar la aplicación en modo debug
         app.run(debug=True)
     except Exception as e:
-        print(e)
-        sys.exit(e)        
+        # Manejo de errores de inicialización
+        print("Error al iniciar la aplicación:", e)
+        sys.exit(e)
