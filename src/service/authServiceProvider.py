@@ -1,6 +1,6 @@
 # Importa SdkAws y EnvsAwsSm
 from src.config import SdkAws, EnvsAwsSm
-from src.domain.dto import UserRegisterDTO, UserConfirmDTO, UserLoginDTO, ConfirmMFADTO, VerifyMFACodeDTO
+from src.domain.dto import UserRegisterDTO, UserConfirmDTO, UserLoginDTO, ConfirmMFADTO, VerifyMFACodeDTO, UserLogoutDTO
 import json
 
 class AuthServiceProvider:
@@ -141,6 +141,21 @@ class AuthServiceProvider:
             return response
         except cognitoClient.exceptions.NotAuthorizedException:
             return {"error": "Invalid TOTP code"}, 403
+        except Exception as e:
+            return {"error": str(e)}, 500
+        
+    def userLogout( self, session: UserLogoutDTO ):
+
+        cognitoClient = self._getCognitoClient()
+
+        try:
+            # Llamamos a global_sign_out para cerrar la sesión en Cognito
+            response = cognitoClient.global_sign_out(
+                AccessToken=session["session"]
+            )
+            return response, 200
+        except cognitoClient.exceptions.NotAuthorizedException:
+            return {"error": "The user is not authorized or token is invalid"}, 403
         except Exception as e:
             return {"error": str(e)}, 500
 
