@@ -1,5 +1,5 @@
 from src.service import AuthService
-from src.domain.dto import UserRegisterDTO, UserConfirmDTO, UserLoginDTO, ConfirmMFADTO, VerifyMFACodeDTO
+from src.domain.dto import UserRegisterDTO, UserConfirmDTO, UserLoginDTO, ConfirmMFADTO, VerifyMFACodeDTO, UserLogoutDTO
 
 
 class AuthController:
@@ -84,7 +84,21 @@ class AuthController:
             }, 400
         
         return self.service.verifyMfaCode( dataDto )
+    
+    def userLogout( self, data ):
 
+        [ error, dataDto ] = UserLogoutDTO.createDTO( data )
+
+        if( error ):
+            return {
+                "fieldsError": dataDto,
+                "status": {
+                    "code": 400,
+                    "message": "Bad request."
+                }
+            }, 400
+        
+        return self.service.userLogout( dataDto )
 
 
 

@@ -68,5 +68,14 @@ def verifyMfaCode():
         }, 400
     return controller.verifyMfaCode( data ) 
 
-    
+@api_auth.route('/userLogout', methods=["Post"])
+def userLogout():
+    try:
+        data = request.get_json()
+    except Exception as e:
+        print('no tiene json')
+        return {
+            "error":"there is no data"
+        }, 400
+    return controller.userLogout( data )     
         
