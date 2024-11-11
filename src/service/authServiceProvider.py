@@ -1,6 +1,6 @@
 # Importa SdkAws y EnvsAwsSm
 from src.config import SdkAws, EnvsAwsSm
-from src.domain.dto import UserRegisterDTO, UserConfirmDTO, UserLoginDTO, ConfirmMFADTO
+from src.domain.dto import UserRegisterDTO, UserConfirmDTO, UserLoginDTO, ConfirmMFADTO, VerifyMFACodeDTO
 import json
 
 class AuthServiceProvider:
@@ -84,7 +84,10 @@ class AuthServiceProvider:
                     "message": response['ChallengeName'],
                 }, 200
             # Usuario autenticado
-            return response['AuthenticationResult'], 200
+            return {
+                "message": response['ChallengeName'],
+                "session": response['Session']
+            }, 200
         except cognitoClient.exceptions.NotAuthorizedException:
             return {"error": "Invalid credentials"}, 403
         except Exception as e:
@@ -117,6 +120,26 @@ class AuthServiceProvider:
             else:
                 return {"error": "MFA setup failed"}, 400
         except cognitoClient.exceptions.CodeMismatchException:
+            return {"error": "Invalid TOTP code"}, 403
+        except Exception as e:
+            return {"error": str(e)}, 500
+        
+    def verifyMfaCode( self, data: VerifyMFACodeDTO ):
+        envs = self._getEnvsCognito()
+        cognitoClient = self._getCognitoClient()
+
+        try:
+            response = cognitoClient.respond_to_auth_challenge(
+                ClientId=envs["CLIENT_ID"],
+                ChallengeName='SOFTWARE_TOKEN_MFA',
+                Session=data["session"],
+                ChallengeResponses={
+                    'USERNAME': data["email"],  # Cambia esto al nombre de usuario
+                    'SOFTWARE_TOKEN_MFA_CODE': data["userCode"]
+                }
+            )
+            return response
+        except cognitoClient.exceptions.NotAuthorizedException:
             return {"error": "Invalid TOTP code"}, 403
         except Exception as e:
             return {"error": str(e)}, 500
