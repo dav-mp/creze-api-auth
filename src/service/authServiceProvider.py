@@ -3,19 +3,24 @@ from src.config import SdkAws, EnvsAwsSm
 from src.domain.dto import UserRegisterDTO, UserConfirmDTO, UserLoginDTO, ConfirmMFADTO, VerifyMFACodeDTO, UserLogoutDTO
 import json
 
+# Clase que funciona para consumir un SDK y poder conectar con los servicios de nuestro servicio externo de auth
+
 class AuthServiceProvider:
     sdk = None
     envsCognito = None
 
+    # En cuanto se crea una instancia de nuestra clase obtenemos nuestra instancia de BOTO3 y obtenemos las variables de entorno que las tenemos almacenadas en AWS SM
     def __init__(self, sdkProvider: SdkAws) -> None:
         self.sdk = sdkProvider
         envs_aws_sm = EnvsAwsSm()  
         self.envsCognito = envs_aws_sm.getEnvs() 
 
+    # Metodo privado que transforma en diccionario las variables de entorno
     def _getEnvsCognito( self ):
         envs = json.loads(self.envsCognito)
         return envs
 
+    # Obtiene la conexion con aws cognito
     def _getCognitoClient( self ):
         session = self.sdk.get_session()
         cognitoClient = session.client('cognito-idp', region_name='us-east-1')
@@ -25,11 +30,16 @@ class AuthServiceProvider:
     def userRegister(self, user: UserRegisterDTO):
 
         try:
+            # Obtenemos variables de AWS SM
             envs = json.loads(self.envsCognito)
 
+            # Creamos una conexion con AWS mediante credenciales
             session = self.sdk.get_session()
+
+            # Conectamos con AWS cognito
             cognitoClient = session.client('cognito-idp', region_name='us-east-1')
 
+            # Metodo para crear un usaruio en AWS cognito
             response = cognitoClient.sign_up(
                 ClientId=envs["CLIENT_ID"],
                 Username=user["email"], 
@@ -48,8 +58,13 @@ class AuthServiceProvider:
         
     def userConfirm( self, user: UserConfirmDTO ):
 
+        # Obtenemos variables de AWS SM
         envs = json.loads(self.envsCognito)
+
+        # Creamos una conexion con AWS mediante credenciales
         session = self.sdk.get_session()
+
+        # Conectamos con AWS cognito
         cognitoClient = session.client('cognito-idp', region_name='us-east-1')
 
         try:
@@ -65,10 +80,14 @@ class AuthServiceProvider:
         
     def userLogin( self, user: UserLoginDTO ):
 
+        # Obtenemos variables de AWS SM
         envs = self._getEnvsCognito()
+
+        # Conectamos con AWS cognito
         cognitoClient = self._getCognitoClient()
 
         try:
+            # Hace peticion para iniciar sesion de usario e iniciar proceso DE TOTP
             response = cognitoClient.initiate_auth(
                 ClientId=envs["CLIENT_ID"],
                 AuthFlow='USER_PASSWORD_AUTH',
@@ -77,7 +96,7 @@ class AuthServiceProvider:
                     'PASSWORD': user["password"]
                 }
             )
-            print(response)
+            # Inicia proceso de auth mediante TOTP
             if 'ChallengeName' in response and response['ChallengeName'] == 'MFA_SETUP':
                 return {
                     **self.setupMFA( response["Session"] ),
@@ -95,6 +114,7 @@ class AuthServiceProvider:
         
     def setupMFA( self, session: str ):
 
+        # Conectamos con AWS cognito
         cognitoClient = self._getCognitoClient()
 
         try:
@@ -107,6 +127,7 @@ class AuthServiceProvider:
 
     def confirmMFA( self, data: ConfirmMFADTO ):
 
+        # Conectamos con AWS cognito
         cognitoClient = self._getCognitoClient()
 
         try:
@@ -125,7 +146,11 @@ class AuthServiceProvider:
             return {"error": str(e)}, 500
         
     def verifyMfaCode( self, data: VerifyMFACodeDTO ):
+
+        # Obtenemos variables de AWS SM
         envs = self._getEnvsCognito()
+
+        # Conectamos con AWS cognito
         cognitoClient = self._getCognitoClient()
 
         try:
@@ -146,6 +171,7 @@ class AuthServiceProvider:
         
     def userLogout( self, session: UserLogoutDTO ):
 
+        # Conectamos con AWS cognito
         cognitoClient = self._getCognitoClient()
 
         try:

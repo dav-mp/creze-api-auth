@@ -6,6 +6,7 @@ from src.config import SdkAws
 
 class EnvsAwsSm:
 
+    #Obtenemos una instancia de BOTO3 para poder comunicarnos con microservicios de AWS
     _sdk = SdkAws.getInstance()
 
     def __init__(self) -> None:
@@ -13,6 +14,8 @@ class EnvsAwsSm:
 
     def getEnvs(self):
         
+
+        # Obtenemos nuestras variables de entorno mediante AWS SM mediante un nombre que empaqueta nuestras variables, en este caso el nombre es 'CognitoEnvs'
         # TODO: Quitar os.environ[ 'EnvsCognito' ] = 'CognitoEnvs' por testing
         os.environ[ 'EnvsCognito' ] = 'CognitoEnvs'
 

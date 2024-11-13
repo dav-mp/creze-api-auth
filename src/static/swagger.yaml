@@ -1,0 +1,439 @@
+openapi: 3.0.0
+info:
+  title: Auth API
+  description: API para autenticación con AWS Cognito
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000
+    description: Servidor local de desarrollo
+paths:
+  /register:
+    post:
+      summary: Registra un nuevo usuario
+      description: Endpoint para registrar un usuario en AWS Cognito.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "correo@gmail.com"
+                  description: Correo electrónico del usuario
+                password:
+                  type: string
+                  example: "TestPassword123!"
+                  description: Contraseña del usuario
+                name:
+                  type: string
+                  example: "Rick"
+                  description: Nombre del usuario
+      responses:
+        '200':
+          description: Usuario registrado correctamente.
+          content:
+            application/json:
+              example:
+                ResponseMetadata:
+                  HTTPHeaders:
+                    connection: "keep-alive"
+                    content-length: "72"
+                    content-type: "application/x-amz-json-1.1"
+                    date: "Wed, 13 Nov 2024 19:39:35 GMT"
+                    x-amzn-requestid: "4630201a-44e9-4c84-b416-3628047c67b4"
+                  HTTPStatusCode: 200
+                  RequestId: "4630201a-44e9-4c84-b416-3628047c67b4"
+                  RetryAttempts: 0
+                UserConfirmed: false
+                UserSub: "c4280478-20f1-70fb-da0a-3d759263cd23"
+        '400':
+          description: Error en los datos de entrada.
+          content:
+            application/json:
+              example:
+                fieldsError:
+                  password:
+                    - "Missing data for required field."
+                status:
+                  code: 400
+                  message: "Bad request."
+
+  /userLogin:
+    post:
+      summary: Inicia sesión
+      description: Endpoint para iniciar sesión y obtener un token CSRF y otros datos relacionados con la autenticación.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "davidmayopacheco@gmail.com"
+                  description: Correo electrónico del usuario
+                password:
+                  type: string
+                  example: "TestPassword123!"
+                  description: Contraseña del usuario
+      responses:
+        '200':
+          description: Inicio de sesión exitoso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  csrf_token:
+                    type: string
+                    description: Token CSRF para protección contra ataques CSRF.
+                    example: "ImNzcmZfdG9rZW4i.ZzUI8A.KU-u0wu9NzGt0PGXuHDdb0sQylo"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          description: Estado del proceso de autenticación.
+                          enum: ["MFA_SETUP", "SOFTWARE_TOKEN_MFA"]
+                          example: "SOFTWARE_TOKEN_MFA"
+                        secretode:
+                          type: string
+                          description: Código secreto generado para MFA (Autenticación de dos factores).
+                          example: "E26FNLSNMYJ2P6N4AIVHSWNTFI5QQJFJ5LP74VIGVBBHCQWCXDVA"
+                        session:
+                          type: string
+                          description: Sesión actual de autenticación.
+                          example: "AYABeBuisY6IVwGpYtQJmnC76HQAHQABAAdTZXJ2aWNlABBDb2duaXRvVXNlclBvb2xz..."
+        '400':
+          description: Error en los datos de entrada o credenciales inválidas.
+          content:
+            application/json:
+              example:
+                fieldsError:
+                  password:
+                    - "Missing data for required field."
+                status:
+                  code: 400
+                  message: "Bad request."
+
+  /userLogout:
+    post:
+      summary: Cierra sesión del usuario
+      description: Endpoint para cerrar la sesión del usuario en el sistema.
+      parameters:
+        - in: header
+          name: X-CSRF-Token
+          required: true
+          schema:
+            type: string
+          description: Token CSRF necesario para la seguridad del endpoint.
+          example: "ImNzcmZfdG9rZW4i.ZzGXXg.maPXjjgnmBJKy_93yOsKE3goqZ0"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session:
+                  type: string
+                  description: Sesión activa del usuario.
+                  example: "eyJraWQiOiJsOVd1bWtJalg3eWVVeXo4MzROV1wvTkszTEtMQ0lhVTJFZll6Y1k5VFYrVT0i..."
+      responses:
+        '200':
+          description: Cierre de sesión exitoso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ResponseMetadata:
+                    type: object
+                    description: Metadatos de la solicitud.
+                    properties:
+                      HTTPHeaders:
+                        type: object
+                        properties:
+                          connection:
+                            type: string
+                            example: "keep-alive"
+                          content-length:
+                            type: string
+                            example: "2"
+                          content-type:
+                            type: string
+                            example: "application/x-amz-json-1.1"
+                          date:
+                            type: string
+                            example: "Wed, 13 Nov 2024 20:28:44 GMT"
+                          x-amzn-requestid:
+                            type: string
+                            example: "e2a73e46-548a-4045-9b4b-242b4200b635"
+                      HTTPStatusCode:
+                        type: integer
+                        description: Código HTTP de la respuesta.
+                        example: 200
+                      RequestId:
+                        type: string
+                        description: Identificador único de la solicitud.
+                        example: "e2a73e46-548a-4045-9b4b-242b4200b635"
+                      RetryAttempts:
+                        type: integer
+                        description: Número de intentos de reintento.
+                        example: 0
+        '400':
+          description: Error en los datos de entrada o encabezados requeridos faltantes.
+          content:
+            application/json:
+              example:
+                fieldsError:
+                  session:
+                    - "Missing data for required field."
+                status:
+                  code: 400
+                  message: "Bad request."
+
+  /verifyMfaCode:
+    post:
+      summary: Verifica el código MFA
+      description: Endpoint para verificar el código de autenticación de múltiples factores (MFA).
+      parameters:
+        - in: header
+          name: X-CSRF-Token
+          required: true
+          schema:
+            type: string
+          description: Token CSRF necesario para la seguridad del endpoint.
+          example: "ImNzcmZfdG9rZW4i.ZzGXXg.maPXjjgnmBJKy_93yOsKE3goqZ0"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session:
+                  type: string
+                  description: Sesión actual del usuario.
+                  example: "AYABeH44oIs6hABlsXLgf4QrTzwAHQABAAdTZXJ2aWNlABBDb2duaXRvVXNlclBvb2xz..."
+                email:
+                  type: string
+                  description: Correo electrónico del usuario.
+                  example: "davidmayopacheco@gmail.com"
+                userCode:
+                  type: string
+                  description: Código generado por el usuario para MFA.
+                  example: "396512"
+      responses:
+        '200':
+          description: Verificación exitosa del código MFA.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  AuthenticationResult:
+                    type: object
+                    properties:
+                      AccessToken:
+                        type: string
+                        description: Token de acceso válido.
+                        example: "eyJraWQiOiJsOVd1bWtJalg3eWVVeXo4MzROV1wvTkszTEtMQ0lhVTJFZll6Y1k5VFYrVT0i..."
+                      ExpiresIn:
+                        type: integer
+                        description: Tiempo de expiración en segundos.
+                        example: 3600
+                      IdToken:
+                        type: string
+                        description: Token de identidad del usuario.
+                        example: "eyJraWQiOiJEZGprRDhJOXk3cjdxdWhyR245NHNKdnkwOE9aQmZPVkc0bVplWUZrQkZJPS..."
+                      RefreshToken:
+                        type: string
+                        description: Token para refrescar la sesión.
+                        example: "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ..."
+                      TokenType:
+                        type: string
+                        description: Tipo de token retornado.
+                        example: "Bearer"
+                  ChallengeParameters:
+                    type: object
+                    description: Parámetros adicionales del desafío.
+                    example: {}
+                  ResponseMetadata:
+                    type: object
+                    properties:
+                      HTTPHeaders:
+                        type: object
+                        properties:
+                          connection:
+                            type: string
+                            example: "keep-alive"
+                          content-length:
+                            type: string
+                            example: "4089"
+                          content-type:
+                            type: string
+                            example: "application/x-amz-json-1.1"
+                          date:
+                            type: string
+                            example: "Wed, 13 Nov 2024 20:28:15 GMT"
+                          x-amzn-requestid:
+                            type: string
+                            example: "351013d6-9d0b-4031-a83d-4d4b18800e90"
+                      HTTPStatusCode:
+                        type: integer
+                        description: Código HTTP.
+                        example: 200
+                      RequestId:
+                        type: string
+                        description: Identificador único de la solicitud.
+                        example: "351013d6-9d0b-4031-a83d-4d4b18800e90"
+                      RetryAttempts:
+                        type: integer
+                        description: Número de intentos de reintento.
+                        example: 0
+        '400':
+          description: Error en los datos de entrada o encabezados requeridos faltantes.
+          content:
+            application/json:
+              example:
+                fieldsError:
+                  userCode:
+                    - "Missing data for required field."
+                status:
+                  code: 400
+                  message: "Bad request."
+
+  /userConfirm:
+    post:
+      summary: Confirma un usuario
+      description: Endpoint para confirmar la creación de un usuario mediante un código de confirmación.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "correo@gmail.com"
+                  description: Correo electrónico del usuario
+                confirmationCode:
+                  type: string
+                  example: "488697"
+                  description: Código de confirmación enviado al correo
+      responses:
+        '200':
+          description: Confirmación exitosa del usuario.
+          content:
+            application/json:
+              example:
+                message: "User confirm success"
+        '400':
+          description: Error en los datos de entrada o código incorrecto.
+          content:
+            application/json:
+              example:
+                fieldsError:
+                  confirmationCode:
+                    - "Missing data for required field."
+                status:
+                  code: 400
+                  message: "Bad request."
+  /confirmMFA:
+    post:
+      summary: Confirma la configuración MFA
+      description: Endpoint para confirmar la configuración de Multi-Factor Authentication (MFA).
+      parameters:
+        - in: header
+          name: X-CSRF-Token
+          required: true
+          schema:
+            type: string
+          description: Token CSRF necesario para la seguridad del endpoint.
+          example: "ImNzcmZfdG9rZW4i.ZzGXXg.maPXjjgnmBJKy_93yOsKE3goqZ0"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session:
+                  type: string
+                  description: Sesión actual del usuario.
+                  example: "AYABeKygbNwab8bVNgOQ8igKsigAHQABAAdTZXJ2aWNlABBDb2duaXRvVXNlclBvb2xz..."
+                userCode:
+                  type: string
+                  description: Código generado por el usuario para la configuración MFA.
+                  example: "644202"
+      responses:
+        '200':
+          description: Confirmación exitosa de MFA.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de confirmación.
+                    example: "MFA setup complete"
+                  response:
+                    type: object
+                    properties:
+                      ResponseMetadata:
+                        type: object
+                        properties:
+                          HTTPHeaders:
+                            type: object
+                            properties:
+                              connection:
+                                type: string
+                                example: "keep-alive"
+                              content-length:
+                                type: string
+                                example: "1008"
+                              content-type:
+                                type: string
+                                example: "application/x-amz-json-1.1"
+                              date:
+                                type: string
+                                example: "Wed, 13 Nov 2024 20:21:42 GMT"
+                              x-amzn-requestid:
+                                type: string
+                                example: "63bf649f-2c58-4946-abb0-69f571a4bc39"
+                          HTTPStatusCode:
+                            type: integer
+                            example: 200
+                          RequestId:
+                            type: string
+                            example: "63bf649f-2c58-4946-abb0-69f571a4bc39"
+                          RetryAttempts:
+                            type: integer
+                            example: 0
+                      Session:
+                        type: string
+                        description: Nueva sesión tras la confirmación de MFA.
+                        example: "AYABeBH91KJ_zl4_kP1yfS4-VWcAHQABAAdTZXJ2aWNlABBDb2duaXRvVXNlclBvb2xz..."
+                      Status:
+                        type: string
+                        description: Estado del proceso.
+                        example: "SUCCESS"
+        '400':
+          description: Error en los datos de entrada o falta de encabezados requeridos.
+          content:
+            application/json:
+              example:
+                fieldsError:
+                  userCode:
+                    - "Missing data for required field."
+                status:
+                  code: 400
+                  message: "Bad request."

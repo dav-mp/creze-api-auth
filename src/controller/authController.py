@@ -9,10 +9,12 @@ class AuthController:
 
     def userRegister( self, data ):
 
+        # Pasamos el JSON a nuestro DTO para validar campos necesarios para procesar la info
         [ error, dataDto ] = UserRegisterDTO.createDTO( data )
         
         print('ErrorDto', error)
 
+        # Valdiamos si hay algun error en el cuerpo de la peticion
         if( error ):
             return {
                 "fieldsError": dataDto,
@@ -27,8 +29,10 @@ class AuthController:
 
     def userConfirm( self, data ):
 
+        # Pasamos el JSON a nuestro DTO para validar campos necesarios para procesar la info
         [ error, dataDto ] = UserConfirmDTO.createDTO( data )
 
+        # Valdiamos si hay algun error en el cuerpo de la peticion
         if( error ):
             return {
                 "fieldsError": dataDto,
@@ -42,8 +46,10 @@ class AuthController:
     
     def userLogin( self, data ):
 
+        # Pasamos el JSON a nuestro DTO para validar campos necesarios para procesar la info
         [ error, dataDto ] = UserLoginDTO.createDTO( data )
-
+        
+        # Valdiamos si hay algun error en el cuerpo de la peticion
         if( error ):
             return {
                 "fieldsError": dataDto,
@@ -57,8 +63,10 @@ class AuthController:
     
     def confirmMFA( self, data ):
 
+        # Pasamos el JSON a nuestro DTO para validar campos necesarios para procesar la info
         [ error, dataDto ] = ConfirmMFADTO.createDTO( data )
-
+        
+        # Valdiamos si hay algun error en el cuerpo de la peticion
         if( error ):
             return {
                 "fieldsError": dataDto,
@@ -72,8 +80,10 @@ class AuthController:
     
     def verifyMfaCode( self, data ):
 
+        # Pasamos el JSON a nuestro DTO para validar campos necesarios para procesar la info
         [ error, dataDto ] = VerifyMFACodeDTO.createDTO( data )
-
+        
+        # Valdiamos si hay algun error en el cuerpo de la peticion
         if( error ):
             return {
                 "fieldsError": dataDto,
@@ -87,8 +97,10 @@ class AuthController:
     
     def userLogout( self, data ):
 
+        # Pasamos el JSON a nuestro DTO para validar campos necesarios para procesar la info
         [ error, dataDto ] = UserLogoutDTO.createDTO( data )
-
+        
+        # Valdiamos si hay algun error en el cuerpo de la peticion
         if( error ):
             return {
                 "fieldsError": dataDto,

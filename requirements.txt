@@ -3,3 +3,4 @@ Flask
 boto3
 marshmallow
 zappa
+flask-swagger-ui

@@ -1,6 +1,9 @@
 from src.domain.dto import UserRegisterDTO, userConfirmDTO, UserLoginDTO, ConfirmMFADTO, VerifyMFACodeDTO, UserLogoutDTO
 from src.service.authServiceProvider import AuthServiceProvider
 
+# Clase de tipo servicio que nos ayuda a conectarnos con nuestro proveedor para hacer un flujo de auth
+# Si se trabajara con un ORM aqui mismo se haria la logica de extraccion de datos, sin necesidad de un AuthServiceProvider
+
 class AuthService: 
 
 
