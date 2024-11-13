@@ -47,7 +47,7 @@ class AuthController:
         if( error ):
             return {
                 "fieldsError": dataDto,
-                "status": {
+                "error": {
                     "code": 400,
                     "message": "Bad request."
                 }

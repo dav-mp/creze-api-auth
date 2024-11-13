@@ -13,6 +13,7 @@ authServiceProvider = AuthServiceProvider( sdk )
 service = AuthService( authServiceProvider )
 controller = AuthController( service )
 
+# TODO: buscar como aplicar el rate limit de peticiones
 
 @api_auth.route('/userRegister', methods=['Post'])
 def userRegister():
@@ -46,13 +47,29 @@ def userLogin():
             "error":"there is no data"
         }, 400
     
-    response = make_response(controller.userLogin( data ))
+    # Suponiendo que `data` es el payload de autenticación
+    response_data = controller.userLogin(data)
+    response = make_response(response_data)
 
+    print(response_data)
+
+    if response_data[1] != 200:
+        if response_data[0].get('error'):
+            return response_data
+
+    # Genera el token CSRF
     csrf_token = CSRFProvider.generateCsrfToken()
 
+    # Agrega el token CSRF en la cookie con `httponly=True`
     response.set_cookie('csrf_token', csrf_token, httponly=True, secure=True, samesite='Strict')
 
-    return response
+    # Agrega el token CSRF en el cuerpo de la respuesta JSON
+    response = make_response({
+        "data": response_data,
+        "csrf_token": csrf_token
+    })
+
+    return response 
 
 @api_auth.route('/confirmMFA', methods=["Post"])
 @CSRFProvider.csrf_protect

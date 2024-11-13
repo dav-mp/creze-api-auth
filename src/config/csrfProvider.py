@@ -24,6 +24,7 @@ class CSRFProvider:
         @wraps(f)
         def decorated_function(*args, **kwargs):
             token = request.headers.get("X-CSRF-Token")
+            print(request.headers)
             if not token or not CSRFProvider.validateCsrfToken(token):
                 return jsonify({"error": "Invalid CSRF token"}), 403
             return f(*args, **kwargs)
