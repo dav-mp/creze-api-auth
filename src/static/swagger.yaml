@@ -73,7 +73,7 @@ paths:
               properties:
                 email:
                   type: string
-                  example: "davidmayopacheco@gmail.com"
+                  example: "correo@gmail.com"
                   description: Correo electrónico del usuario
                 password:
                   type: string
@@ -224,7 +224,7 @@ paths:
                 email:
                   type: string
                   description: Correo electrónico del usuario.
-                  example: "davidmayopacheco@gmail.com"
+                  example: "correo@gmail.com"
                 userCode:
                   type: string
                   description: Código generado por el usuario para MFA.
